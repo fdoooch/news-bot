@@ -2,7 +2,7 @@
     "apps": [
       {
         "name": "news-publisher",
-        "cwd": "~/news-bot",
+        "cwd": "/root/news-bot",
         "interpreter": "uv",
         "script": "run",
         "args": "python -m app.main",
