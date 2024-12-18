@@ -1,8 +1,3 @@
-# TODO
-[v] спарсить ленту новостей
-[ ] отфильтровать новости по категории и по дате
-[ ] взять последнюю новость в каждой категории
-
 ## TASK
 написать бота для телеграмм который бы мониторил выход новостей отсюда
 https://decrypt.co/news/cryptocurrencies
@@ -21,6 +16,25 @@ https://decrypt.co/news/gaming
 - добавляет картинку
 - постит
 
+## Настройки
+Основные настройки задаются переменными окружения:
+OPENAI_API_KEY - API-key для работы с chatgpt
+OPENAI_PROJECT_ID
+OPENAI_MODEL
+OPENAI_MAX_TOKENS - максимальное количество токенов в одном запросе к чатгпт
+OPENAI_TEMPERATURE - температура ответов чатгпт
+TG_BOT_API_TOKEN - токен телеграм-бота который является админом каналов, в которые нужен постинг
+TG_BOT_TARGET_CHANNELS - список каналов, через запятую без пробелов. без t.me/ и без @
+RSS_FEED_URLS - список rss-лент новостей, через запятую, без пробелов. Пример: https://news.com/feed
+RSS_CATEGORIES - список категорий новостей для постинга, через запятую, без пробелов. Пример: Coins,Gaming
+PUBLISHING_SCHEDULE - расписание постинга в формате HH:MM, через запятую, без пробелов. Пример: 12:00,19:00,18:51
 
-Промт для ChatGPT 
-Rewrite the text briefly, up to 500 characters, in the style of Ghost on the Block.
+При запуске скрипта в окружение автоматически загружаются переменные из файла .env
+
+## Предустановка
+Для запуска скрипта нужно установить UV - https://docs.astral.sh/uv/getting-started/installation/
+
+## Запуск
+Запускать можно командой uv run python -m app.main
+
+Также возможен запуск через pm2: pm2 start pm2-config.json
