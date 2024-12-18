@@ -29,8 +29,8 @@ def get_latest_news_by_categories(feed_urls: list[str], target_categories: list[
                 # Parse the publication date
                 try:
                     pub_date = parser.parse(entry.published)
-                    # if not _is_today(pub_date):
-                    #     continue
+                    if not _is_today(pub_date):
+                        continue
                 except (AttributeError, ValueError):
                     # If parsing fails, try alternative date fields or skip
                     try:

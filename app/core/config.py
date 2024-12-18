@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     LOGGER_NAME: str = "news_publisher"
     BASE_DIR: str = str(BASE_DIR)
     TMP_DIR: str = os.path.join(Path(BASE_DIR).resolve(), "tmp")
+    PUBLISHING_SCHEDULE_HOURS: int = int(os.getenv("PUBLISHING_SCHEDULE_HOURS", 17))
+    PUBLISHING_SCHEDULE_MINUTES: int = int(os.getenv("PUBLISHING_SCHEDULE_MINUTES", 15))
 
 
 settings = Settings()
