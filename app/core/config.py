@@ -227,20 +227,23 @@ class Settings(BaseSettings):
 
 def setup_logging(settings: Settings) -> logging.Logger:
     """Configure and setup logging."""
-    logging.basicConfig(
-        level=logging.WARNING,
-        format="%(asctime)s %(levelname).3s | %(name)s -> %(funcName)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    
+    # Get logger instance
     logger = logging.getLogger(settings.LOGGER_NAME)
+    
+    # Set logger level
+    logger.setLevel(logging.DEBUG)
+    
+    # Create formatter
     formatter = logging.Formatter(
         fmt="%(asctime)s %(levelname).3s | %(name)s -> %(funcName)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     
-    # Clear existing handlers
+    # Clear any existing handlers
     logger.handlers.clear()
+    
+    # Prevent propagation to root logger to avoid double logging
+    logger.propagate = False
     
     # Add console handler
     console_handler = logging.StreamHandler()
@@ -253,7 +256,6 @@ def setup_logging(settings: Settings) -> logging.Logger:
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     
-    logger.setLevel(logging.DEBUG)
     return logger
 
 # Initialize settings

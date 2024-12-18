@@ -24,7 +24,6 @@ def convert_and_resize_image(input_path, output_path, size=(800, 600), quality=8
             # Save as JPEG
             img.save(output_path, 'JPEG', quality=quality, optimize=True)
             
-        print(f"Successfully converted and resized image: {output_path}")
         return output_path
         
     except Exception as e:

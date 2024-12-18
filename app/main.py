@@ -2,8 +2,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import os
 import json
-from datetime import datetime as dt
-from datetime import timedelta
+import logging
 from app.core.config import settings
 from app.core.parse_news_feed import get_latest_news_by_categories
 from app.core.get_news_full_text import get_full_article_text
@@ -12,8 +11,10 @@ from app.core.download_image import temp_download_async
 from app.core.channel_poster import ChannelPoster
 from app.core.prepare_image import convert_and_resize_image
 
-async def main():
+logger = logging.getLogger(settings.LOGGER_NAME)
 
+async def main():
+    print("Hello from news-bot!")
     if not os.path.exists(settings.TMP_DIR):
             os.makedirs(settings.TMP_DIR)
 
@@ -21,7 +22,7 @@ async def main():
     if not os.path.exists(os.path.join(settings.TMP_DIR, 'last_published.json')):
         with open(os.path.join(settings.TMP_DIR, 'last_published.json'), 'w') as file:
             json.dump({}, file)
-            
+
     # Create the scheduler
     scheduler = AsyncIOScheduler()
     for item in settings.PUBLISHING_SCHEDULE.split(','):
@@ -39,28 +40,20 @@ async def main():
         # Keep the main program running
         while True:
             await asyncio.sleep(15)
-            # print_job_info(scheduler)
     except (KeyboardInterrupt, SystemExit):
-        # Shut down scheduler gracefully
         scheduler.shutdown()
 
 
 async def _publish_news_job():
-    print("Hello from news-bot!")
+    
     with open(os.path.join(settings.TMP_DIR, 'last_published.json'), 'r') as file:
         last_published = json.load(file)
-
-    print(f"Last published: {last_published}")
-
+    
     news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES, last_published)
     for category, news_items in news_feed.items():
-        print(f"\n{'='*20} {category.upper()} {'='*20}")
         for item in news_items:
-            print(f"Title: {item['title']}")
-            print(f"Published: {item['published_at']}")
-            print(f"Image: {item['img']}")
             await _process_news_item(item)
-        print('='*50)
+            logger.info(f"Published {item['title']}:[{category}]")
 
 
 def print_job_info(scheduler):
