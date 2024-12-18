@@ -2,9 +2,8 @@
     "apps": [
       {
         "name": "news-publisher",
-        "interpreter": "uv",
-        "script": "run",
-        "args": "python -m app.main",
+        "script": "uv",
+        "args": ["run", "python", "-m", "app.main"],
         "instances": 1,
         "autorestart": true,
         "watch": false,
