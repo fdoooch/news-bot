@@ -1,6 +1,9 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import os
+import json
+from datetime import datetime as dt
+from datetime import timedelta
 from app.core.config import settings
 from app.core.parse_news_feed import get_latest_news_by_categories
 from app.core.get_news_full_text import get_full_article_text
@@ -13,22 +16,30 @@ async def main():
 
     if not os.path.exists(settings.TMP_DIR):
             os.makedirs(settings.TMP_DIR)
+
+    # create last_published.json if it doesn't exist
+    if not os.path.exists(os.path.join(settings.TMP_DIR, 'last_published.json')):
+        with open(os.path.join(settings.TMP_DIR, 'last_published.json'), 'w') as file:
+            json.dump({}, file)
+            
     # Create the scheduler
     scheduler = AsyncIOScheduler()
-    
-    # Schedule the task to run at 2:30 PM every day
-    scheduler.add_job(
-        _publish_news_job,
-        CronTrigger(hour=settings.PUBLISHING_SCHEDULE_HOURS, minute=settings.PUBLISHING_SCHEDULE_MINUTES),  # 24-hour format
-    )
+    for item in settings.PUBLISHING_SCHEDULE.split(','):
+        hours, minutes = item.split(':')
+        scheduler.add_job(
+            _publish_news_job,
+            CronTrigger(hour=hours, minute=minutes),  # 24-hour format
+        )
+
     
     scheduler.start()
+    print_job_info(scheduler)
     
     try:
         # Keep the main program running
         while True:
             await asyncio.sleep(15)
-            print_job_info(scheduler)
+            # print_job_info(scheduler)
     except (KeyboardInterrupt, SystemExit):
         # Shut down scheduler gracefully
         scheduler.shutdown()
@@ -36,7 +47,12 @@ async def main():
 
 async def _publish_news_job():
     print("Hello from news-bot!")
-    news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES)
+    with open(os.path.join(settings.TMP_DIR, 'last_published.json'), 'r') as file:
+        last_published = json.load(file)
+
+    print(f"Last published: {last_published}")
+
+    news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES, last_published)
     for category, news_items in news_feed.items():
         print(f"\n{'='*20} {category.upper()} {'='*20}")
         for item in news_items:
