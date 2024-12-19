@@ -20,7 +20,7 @@ class ChannelPoster:
 
 # #quests_zone"""
             bottom_text = """
-#quests_zone"""
+#quests_news"""
             text = f"<b>{title.upper()}</b>\n\n{message}\n{bottom_text}"
             await self.send_photo(chat_id=f"@{channel_id}", image_path=image_path, caption=text, parse_mode="HTML")
     
