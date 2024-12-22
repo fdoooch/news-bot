@@ -14,6 +14,11 @@ class ChannelPoster:
 
 
     async def publish_news(self, message: str, title: str = None, image_path: str = None):
+        if not self.channels_ids:
+            logger.warning("No channels specified for publishing news.")
+            return
+        logger.info(f"Publishing news: {title} to channels: {', '.join(self.channels_ids)}")
+
         for channel_id in self.channels_ids:
             # logger.info(f"Sending news to channel @{channel_id}")
 #             bottom_text = f"""📱 {html.link("DC", "https://discord.gg/myvTswfa3s")}  | 📱 {html.link("TG", "https://t.me/questszone")}  | 📱 {html.link("CIS", "https://t.me/questszone_ru")}  | 📱 {html.link("YT", "https://www.youtube.com/@QuestsZone")}
