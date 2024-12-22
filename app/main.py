@@ -38,10 +38,11 @@ async def main():
     
     try:
         # Keep the main program running
+        pause_lenght = 15
         while True:
-            if dt.now().minute == 0:
+            if dt.now().minute == 0 and dt.now().second < pause_lenght:
                 logger.info(f"Runnung. Next post at {scheduler.get_jobs()[0].next_run_time}")
-            await asyncio.sleep(15)
+            await asyncio.sleep(pause_lenght)
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
 
@@ -65,14 +66,14 @@ def print_job_info(scheduler):
     # Get all jobs
     jobs = scheduler.get_jobs()
     
-    print("\nScheduled Jobs:")
-    print("-" * 50)
+    logger.info("\nScheduled Jobs:")
+    logger.info("-" * 50)
     for job in jobs:
-        print(f"Job ID: {job.id}")
-        print(f"Next run time: {job.next_run_time}")
-        print(f"Trigger: {job.trigger}")
-        print(f"Function: {job.func.__name__}")
-        print("-" * 50)
+        logger.info(f"Job ID: {job.id}")
+        logger.info(f"Next run time: {job.next_run_time}")
+        logger.info(f"Trigger: {job.trigger}")
+        logger.info(f"Function: {job.func.__name__}")
+        logger.info("-" * 50)
 
 
 

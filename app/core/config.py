@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional, List
+from typing import List
 from functools import lru_cache
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -251,7 +251,7 @@ def setup_logging(settings: Settings) -> logging.Logger:
     logger.addHandler(console_handler)
     
     # Add file handler
-    log_file = settings.TMP_DIR / "app.log"
+    log_file = settings.BASE_DIR / "logs/out.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
