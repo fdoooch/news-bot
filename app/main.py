@@ -53,6 +53,9 @@ async def _publish_news_job():
         last_published = json.load(file)
     
     news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES, last_published)
+    if len(news_feed) == 0:
+        logger.info("No fresh news found.")
+        return
     for category, news_items in news_feed.items():
         if not news_items:
             logger.info(f"No fresh news found for category: {category}")
