@@ -2,6 +2,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import os
 import json
+from datetime import datetime as dt
 import logging
 from app.core.config import settings
 from app.core.parse_news_feed import get_latest_news_by_categories
@@ -32,13 +33,14 @@ async def main():
             CronTrigger(hour=hours, minute=minutes),  # 24-hour format
         )
 
-    
     scheduler.start()
     print_job_info(scheduler)
     
     try:
         # Keep the main program running
         while True:
+            if dt.now().minute == 0:
+                logger.info(f"Runnung. Next post at {scheduler.get_jobs()[0].next_run_time}")
             await asyncio.sleep(15)
     except (KeyboardInterrupt, SystemExit):
         scheduler.shutdown()
@@ -51,6 +53,9 @@ async def _publish_news_job():
     
     news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES, last_published)
     for category, news_items in news_feed.items():
+        if not news_items:
+            logger.info(f"No fresh news found for category: {category}")
+            continue
         for item in news_items:
             await _process_news_item(item)
             logger.info(f"Published {item['title']}:[{category}]")
