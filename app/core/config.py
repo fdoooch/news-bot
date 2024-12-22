@@ -10,15 +10,16 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 # Base directory setup
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+APP_DIR = Path(__file__).resolve().parent.parent
 
 @lru_cache()
 def load_env_file() -> bool:
     """Load environment variables from .env file."""
-    env_file = find_dotenv(str(BASE_DIR.parent / ".env"))
+    env_file = find_dotenv(str(BASE_DIR / ".env"))
     if env_file:
         return load_dotenv(env_file)
-    print(f"No .env file found in {BASE_DIR.parent}")
+    print(f"No .env file found in {BASE_DIR}")
     return False
 
 # Load environment variables
@@ -158,8 +159,9 @@ class Settings(BaseSettings):
     tg_bot: TgBotSettings = Field(default_factory=TgBotSettings)
     rss_feed: RssFeedSettings = Field(default_factory=RssFeedSettings)
     LOGGER_NAME: str = "news_publisher"
-    BASE_DIR: Path = Field(default_factory=lambda: BASE_DIR)
-    TMP_DIR: Path = Field(default_factory=lambda: BASE_DIR / "tmp")
+    APP_DIR: Path = Field(default_factory=lambda: APP_DIR)
+    TMP_DIR: Path = Field(default_factory=lambda: APP_DIR / "tmp")
+    LOGS_DIR: Path = Field(default_factory=lambda: BASE_DIR / "logs")
     PUBLISHING_SCHEDULE: str = Field(
         default="17:25",
         description="Schedule for publishing news in HH:MM format (24-hour)"
@@ -251,7 +253,7 @@ def setup_logging(settings: Settings) -> logging.Logger:
     logger.addHandler(console_handler)
     
     # Add file handler
-    log_file = settings.BASE_DIR / "logs/out.log"
+    log_file = settings.LOGS_DIR / "out.log"
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
