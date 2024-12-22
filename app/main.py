@@ -66,15 +66,14 @@ def print_job_info(scheduler):
     # Get all jobs
     jobs = scheduler.get_jobs()
     
-    logger.info("\nScheduled Jobs:")
+    logger.info("Scheduled Jobs:")
     logger.info("-" * 50)
     for job in jobs:
-        logger.info(f"Job ID: {job.id}")
+        logger.info(f"Publishing news from: {settings.rss_feed.URLS}")
+        logger.info(f"Publishing news to channels: {', '.join(settings.tg_bot.TARGET_CHANNELS)}")
         logger.info(f"Next run time: {job.next_run_time}")
-        logger.info(f"Trigger: {job.trigger}")
         logger.info(f"Function: {job.func.__name__}")
         logger.info("-" * 50)
-
 
 
 async def _process_news_item(item: dict):
@@ -88,7 +87,6 @@ async def _process_news_item(item: dict):
     await _publish_news_to_tg_channels(poster, rewrited_text, title=title, image_url=image_url)
 
 
-
 async def _publish_news_to_tg_channels(poster: ChannelPoster, message: str, title: str, image_url: str = None):
     try:
         async with temp_download_async(image_url, prefix=f"{settings.TMP_DIR}/downloading_") as temp_path:
@@ -97,9 +95,6 @@ async def _publish_news_to_tg_channels(poster: ChannelPoster, message: str, titl
         
     finally:
         await poster.close()
-
-    
-
 
 
 if __name__ == "__main__":
