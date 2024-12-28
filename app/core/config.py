@@ -39,15 +39,36 @@ class TgBotSettings(BaseModel):
         ),
         description="List of target Telegram channels"
     )
+    SERVICE_CHANNELS: list[str] = Field(
+        default_factory=lambda: (
+            os.getenv("TG_BOT_SERVICE_CHANNELS", "").split(",")
+            if os.getenv("TG_BOT_SERVICE_CHANNELS")
+            else []
+        ),
+        description="List of channels for service messages"
+    )
 
     @property
     def has_valid_config(self) -> bool:
         """Check if Telegram configuration is valid."""
-        return bool(self.TOKEN and self.TARGET_CHANNELS)
+        return bool(self.TOKEN and self.TARGET_CHANNELS and self.SERVICE_CHANNELS)
 
     @field_validator('TARGET_CHANNELS')
     @classmethod
-    def validate_channels(cls, v):
+    def validate_target_channels(cls, v):
+        """Validate and clean channel list."""
+        validated_channels = []
+        for channel in v:
+            channel = channel.strip()
+            if channel:
+                if not channel.startswith('@'):
+                    channel = f'@{channel}'
+                validated_channels.append(channel)
+        return validated_channels
+    
+    @field_validator('SERVICE_CHANNELS')
+    @classmethod
+    def validate_service_channels(cls, v):
         """Validate and clean channel list."""
         validated_channels = []
         for channel in v:
@@ -166,6 +187,8 @@ class Settings(BaseSettings):
         default="17:25",
         description="Schedule for publishing news in HH:MM format (24-hour)"
     )
+    NEWS_TEXT_MAX_LENGTH: int = os.getenv("NEWS_TEXT_MAX_LENGTH", 1000)
+    MAX_REWRITING_TRIES: int = os.getenv("MAX_REWRITING_TRIES", 3)
     
     model_config = SettingsConfigDict(case_sensitive=True)
 

@@ -73,7 +73,6 @@ def get_latest_news_by_categories(
                 
                 for category in matching_categories:
                     news_by_category[category].append(news_item)
-                    _update_published_dates(prev_published, category, pub_date, tmp_dir)
                     
         except Exception as e:
             logger.error(f"Error processing feed {feed_url}: {str(e)}")
@@ -153,15 +152,7 @@ def create_news_item(entry: feedparser.FeedParserDict, feed: feedparser.FeedPars
     
     return news_item
 
-def _update_published_dates(prev_published: dict[str, dt], category: str, pub_date: dt, tmp_dir: Path) -> None:
-    """Update and persist published dates."""
-    prev_published[category.lower()] = pub_date.isoformat()
-    
-    try:
-        with (tmp_dir / 'last_published.json').open('w') as file:
-            json.dump(prev_published, file)
-    except IOError as e:
-        logger.error(f"Failed to update published dates: {e}")
+
 
 def display_latest_news(news_dict: dict[str, list[NewsItem]]) -> None:
     """Display the latest news for each category."""

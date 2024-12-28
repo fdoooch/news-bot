@@ -1,12 +1,34 @@
 import openai
+import logging
 
 from app.core.config import settings
+from app.core.exceptions import RewritedNewsIsTooLongError
+
+logger = logging.getLogger(settings.LOGGER_NAME)
 
 
 class NewsRewriter:
     def __init__(self, api_key: str):
         """Initialize with OpenAI API key"""
         self.client = openai.OpenAI(api_key=api_key, project=settings.openai.PROJECT_ID)
+
+
+    def rewrite_news(self, news_text: str, news_title: str, max_news_text_len: int = 1000, max_rewriting_tries: int = 3):
+        for _ in range(max_rewriting_tries):
+            rewrited_text = self.rewrite_text(news_text)
+            rewrited_title = self.rewrite_title(news_title)
+            news =  self.gather_news(rewrited_text, rewrited_title)
+            if len(news) <= max_news_text_len:
+                return news
+            logger.warning("Rewrited news is too long. Trying again...")
+            logger.info(f"REWRITED TEXT: {news}")
+        raise RewritedNewsIsTooLongError(
+            error_message="Unable to rewrite news in setted length",
+            original_news=f"{news_title}\n{news_text}",
+            rewrited_news=news,
+            rewrited_news_length=len(news)
+        )
+        
     
     def rewrite_text(self, text: str) -> str:
         """
@@ -35,7 +57,7 @@ class NewsRewriter:
             print(f"Error in rewriting text: {str(e)}")
             return text  # Return original text if rewriting fails
         
-    def write_title(self, text: str) -> str:
+    def rewrite_title(self, text: str) -> str:
         try:
             prompt = create_title_prompt(text)
             
@@ -54,6 +76,12 @@ class NewsRewriter:
         except Exception as e:
             print(f"Error in writing title: {str(e)}")
             return ""  # Return empty string if title writing fails
+        
+    def gather_news(self, news_text: str, news_title: str) -> str:
+        bottom_text = """
+#quests_news"""
+        text = f"<b>{news_title.upper()}</b>\n\n{news_text}\n{bottom_text}"
+        return text
         
 
 def create_rewriting_prompt(source_text):

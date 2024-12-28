@@ -7,28 +7,35 @@ from app.core.config import settings
 logger = logging.getLogger(settings.LOGGER_NAME)
 
 class ChannelPoster:
-    def __init__(self, token: str, channels_ids: list[str]):
+    def __init__(self, token: str, target_channels_ids: list[str], service_channels_ids: list[str]):
         self.bot = Bot(token=token)
         self.dp = Dispatcher()
-        self.channels_ids = channels_ids
+        self.target_channels_ids = target_channels_ids
+        self.service_channels_ids = service_channels_ids
 
 
-    async def publish_news(self, message: str, title: str = None, image_path: str = None):
-        if not self.channels_ids:
+    async def publish_news(self, message: str, image_path: str = None):
+        if not self.target_channels_ids:
             logger.warning("No channels specified for publishing news.")
             return
-        logger.info(f"Publishing news: {title} to channels: {', '.join(self.channels_ids)}")
+        title = message.split('\n')[0]
+        logger.info(f"Publishing news: {title} to channels: {', '.join(self.target_channels_ids)}")
 
-        for channel_id in self.channels_ids:
-            # logger.info(f"Sending news to channel @{channel_id}")
-#             bottom_text = f"""📱 {html.link("DC", "https://discord.gg/myvTswfa3s")}  | 📱 {html.link("TG", "https://t.me/questszone")}  | 📱 {html.link("CIS", "https://t.me/questszone_ru")}  | 📱 {html.link("YT", "https://www.youtube.com/@QuestsZone")}
+        for channel_id in self.target_channels_ids:            
+            await self.send_photo(chat_id=f"@{channel_id}", image_path=image_path, caption=message, parse_mode="HTML")
 
-# #quests_zone"""
-            bottom_text = """
-#quests_news"""
-            text = f"<b>{title.upper()}</b>\n\n{message}\n{bottom_text}"
-            await self.send_photo(chat_id=f"@{channel_id}", image_path=image_path, caption=text, parse_mode="HTML")
+
+    async def send_service_report(self, channels_ids: list[str], message: str):
+        if not self.service_channels_ids:
+            logger.warning("No channels specified for sending service report.")
+            return
+        title = message.split('\n')[0]
+        logger.info(f"Sending service report {title} to channels: {', '.join(channels_ids)}")
+
+        for channel_id in self.service_channels_ids:
+            await self.send_text(chat_id=f"@{channel_id}", text=message, parse_mode="HTML")
     
+
     async def send_text(self, chat_id: str, text: str, parse_mode: str = None) -> bool:
         """Send text message to channel"""
         try:
@@ -40,7 +47,7 @@ class ChannelPoster:
             return True
         except Exception as e:
             logging.error(f"Error sending text message: {e}")
-            return False
+            raise
     
     async def send_photo(self, chat_id: str, image_path: str, caption: str = None, parse_mode: str = None) -> bool:
         """Send photo to channel"""
@@ -54,7 +61,7 @@ class ChannelPoster:
             return True
         except Exception as e:
             logging.error(f"Error sending photo: {e}")
-            return False
+            raise
     
     async def close(self):
         """Close bot session"""
