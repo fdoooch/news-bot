@@ -23,6 +23,9 @@ class ChannelPoster:
 
         for channel_id in self.target_channels_ids:            
             await self.send_photo(chat_id=f"@{channel_id}", image_path=image_path, caption=message, parse_mode="HTML")
+        for channel_id in self.service_channels_ids:            
+            await self.send_photo(chat_id=f"@{channel_id}", image_path=image_path, caption=message, parse_mode="HTML")
+        
 
 
     async def send_service_report(self, channels_ids: list[str], message: str):

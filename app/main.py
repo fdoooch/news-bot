@@ -116,7 +116,6 @@ async def _process_news_item(item: dict):
 
     poster = ChannelPoster(settings.tg_bot.TOKEN, settings.tg_bot.TARGET_CHANNELS, settings.tg_bot.SERVICE_CHANNELS)
     await _publish_news_to_tg_channels(poster, news, image_url=image_url)
-    await _send_service_report(news)
     
 
 async def _send_service_report(msg: str):
