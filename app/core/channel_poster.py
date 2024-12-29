@@ -10,6 +10,11 @@ logger = logging.getLogger(settings.LOGGER_NAME)
 def _remove_html_tags(text):
     return re.sub(r'<[^>]+>', '', text)
 
+def _extract_title_from_rewrited_news(text: str) -> str:
+    title = text.split('\n')[0]
+    title = _remove_html_tags(title)
+    return title
+
 class ChannelPoster:
     def __init__(self, token: str, target_channels_ids: list[str], service_channels_ids: list[str]):
         self.bot = Bot(token=token)
@@ -22,8 +27,7 @@ class ChannelPoster:
         if not self.target_channels_ids:
             logger.warning("No channels specified for publishing news.")
             return
-        title = message.split('\n')[0]
-        title = _remove_html_tags(title)
+        title = _extract_title_from_rewrited_news(message)
         logger.info(f"Publishing news: {title} to channels: {', '.join(self.target_channels_ids)}")
 
         for channel_id in self.target_channels_ids:            
@@ -37,8 +41,7 @@ class ChannelPoster:
         if not self.service_channels_ids:
             logger.warning("No channels specified for sending service report.")
             return
-        title = message.split('\n')[0]
-        title = _remove_html_tags(title)
+        title = _extract_title_from_rewrited_news(message)
         logger.info(f"Sending service report {title} to channels: {', '.join(channels_ids)}")
 
         for channel_id in self.service_channels_ids:
