@@ -1,10 +1,14 @@
 from aiogram import Bot, Dispatcher, html
 from aiogram.types import FSInputFile
 import asyncio
+import re
 import logging
 from app.core.config import settings
 
 logger = logging.getLogger(settings.LOGGER_NAME)
+
+def _remove_html_tags(text):
+    return re.sub(r'<[^>]+>', '', text)
 
 class ChannelPoster:
     def __init__(self, token: str, target_channels_ids: list[str], service_channels_ids: list[str]):
@@ -19,6 +23,7 @@ class ChannelPoster:
             logger.warning("No channels specified for publishing news.")
             return
         title = message.split('\n')[0]
+        title = _remove_html_tags(title)
         logger.info(f"Publishing news: {title} to channels: {', '.join(self.target_channels_ids)}")
 
         for channel_id in self.target_channels_ids:            
@@ -33,6 +38,7 @@ class ChannelPoster:
             logger.warning("No channels specified for sending service report.")
             return
         title = message.split('\n')[0]
+        title = _remove_html_tags(title)
         logger.info(f"Sending service report {title} to channels: {', '.join(channels_ids)}")
 
         for channel_id in self.service_channels_ids:
