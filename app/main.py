@@ -57,10 +57,12 @@ async def _publish_news_job():
     news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES, last_published)
     if len(news_feed) == 0:
         logger.info("No fresh news found.")
+        await _send_service_report("No fresh news found.")
         return
     for category, news_items in news_feed.items():
         if not news_items:
             logger.info(f"No fresh news found for category: {category}")
+            await _send_service_report(f"No fresh news found for category: {category}")
             continue
         for item in news_items:
             try:
