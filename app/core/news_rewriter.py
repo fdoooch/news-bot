@@ -70,8 +70,11 @@ class NewsRewriter:
                 temperature=settings.openai.TEMPERATURE,
                 max_tokens=settings.openai.MAX_TOKENS
             )
-            
-            return response.choices[0].message.content
+            title = response.choices[0].message.content
+            # remove " if its on the sides
+            if title.startswith('"') and title.endswith('"'):
+                title = title[1:-1]
+            return title
             
         except Exception as e:
             print(f"Error in writing title: {str(e)}")
