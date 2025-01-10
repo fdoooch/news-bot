@@ -1,13 +1,10 @@
 from pathlib import Path
-from typing import List
 from functools import lru_cache
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 import logging
 from dotenv import load_dotenv, find_dotenv
-from datetime import datetime
-from urllib.parse import urlparse
 
 # Base directory setup
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -24,6 +21,29 @@ def load_env_file() -> bool:
 
 # Load environment variables
 load_env_file()
+
+
+schedule = [
+    {
+        "source": "decrypt_co",
+        "category": "gaming",
+        "time": ["12:00", "19:00"]
+    },
+    {
+        "source": "decrypt_co",
+        "category": "coins",
+        "time": ["12:00", "19:00"]
+    },
+    {
+        "source": "beincrypto_com",
+        "category": "press releases",
+        "time": ["9:00", "15:00", "21:00"]
+    },
+
+]
+
+
+
 
 class TgBotSettings(BaseModel):
     """Telegram Bot configuration settings."""
@@ -79,48 +99,6 @@ class TgBotSettings(BaseModel):
                 validated_channels.append(channel)
         return validated_channels
 
-class RssFeedSettings(BaseModel):
-    """RSS Feed configuration settings."""
-    URLS: list[str] = Field(
-        default_factory=lambda: (
-            os.getenv("RSS_FEED_URLS", "").split(",")
-            if os.getenv("RSS_FEED_URLS")
-            else []
-        ),
-        description="List of RSS feed URLs"
-    )
-    CATEGORIES: list[str] = Field(
-        default_factory=lambda: (
-            os.getenv("RSS_CATEGORIES", "").split(",")
-            if os.getenv("RSS_CATEGORIES")
-            else []
-        ),
-        description="List of RSS categories to filter"
-    )
-
-    @field_validator('URLS')
-    @classmethod
-    def validate_urls(cls, v):
-        """Validate and clean URLs."""
-        validated_urls = []
-        for url in v:
-            url = url.strip()
-            if url:
-                try:
-                    result = urlparse(url)
-                    if all([result.scheme, result.netloc]):
-                        validated_urls.append(url)
-                    else:
-                        raise ValueError(f"Invalid URL format: {url}")
-                except Exception:
-                    raise ValueError(f"Invalid URL: {url}")
-        return validated_urls
-
-    @field_validator('CATEGORIES')
-    @classmethod
-    def validate_categories(cls, v):
-        """Validate and clean categories."""
-        return [cat.strip() for cat in v if cat.strip()]
 
 class OpenAISettings(BaseModel):
     """OpenAI configuration settings."""
@@ -178,7 +156,6 @@ class Settings(BaseSettings):
     PROJECT_DESCRIPTION: str = "Parse news from RSS feeds and send them to Telegram groups"
     openai: OpenAISettings = Field(default_factory=OpenAISettings)
     tg_bot: TgBotSettings = Field(default_factory=TgBotSettings)
-    rss_feed: RssFeedSettings = Field(default_factory=RssFeedSettings)
     LOGGER_NAME: str = "news_publisher"
     APP_DIR: Path = Field(default_factory=lambda: APP_DIR)
     TMP_DIR: Path = Field(default_factory=lambda: APP_DIR / "tmp")
@@ -189,36 +166,9 @@ class Settings(BaseSettings):
     )
     NEWS_TEXT_MAX_LENGTH: int = os.getenv("NEWS_TEXT_MAX_LENGTH", 1000)
     MAX_REWRITING_TRIES: int = os.getenv("MAX_REWRITING_TRIES", 3)
+    SCHEDULE: list[dict] = schedule
     
     model_config = SettingsConfigDict(case_sensitive=True)
-
-    @field_validator("PUBLISHING_SCHEDULE")
-    @classmethod
-    def validate_schedule(cls, v: str) -> str:
-        """Validate schedule string."""
-        return v
-
-    @model_validator(mode='after')
-    def validate_schedule_times(self):
-        """Validate all schedule times after model creation."""
-        schedule = self.PUBLISHING_SCHEDULE.split(',')
-        validated_times = []
-        
-        for time in schedule:
-            time = time.strip()
-            try:
-                parsed_time = datetime.strptime(time, "%H:%M").time()
-                validated_times.append(f"{parsed_time.hour:02d}:{parsed_time.minute:02d}")
-            except ValueError:
-                raise ValueError(f"Invalid time format: {time}. Use HH:MM format (24-hour)")
-        
-        self.PUBLISHING_SCHEDULE = ','.join(validated_times)
-        return self
-
-    @property
-    def publishing_schedule_list(self) -> List[str]:
-        """Get publishing schedule as a list."""
-        return [time.strip() for time in self.PUBLISHING_SCHEDULE.split(',')]
 
     @property
     def is_valid(self) -> bool:
@@ -226,7 +176,6 @@ class Settings(BaseSettings):
         return all([
             self.openai.API_KEY,
             self.tg_bot.has_valid_config,
-            self.rss_feed.URLS
         ])
 
     def check_paths(self) -> bool:

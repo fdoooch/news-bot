@@ -7,12 +7,14 @@ from datetime import datetime as dt
 import logging
 from app.core.config import settings
 from app.core.exceptions import RewritedNewsIsTooLongError
-from app.core.parse_news_feed import get_latest_news_by_categories
+from app.core.sources.decrypt_co.parse_news_feed import get_latest_news_by_categories
 from app.core.get_news_full_text import get_full_article_text
 from app.core.news_rewriter import NewsRewriter
 from app.core.download_image import temp_download_async
 from app.core.channel_poster import ChannelPoster
 from app.core.prepare_image import convert_and_resize_image
+from app.core.sources.beincrypto_com.parse_news_feed import FeedRader as BeincryptoFeedRader
+from app.core.sources.decrypt_co.parse_news_feed import FeedReader as DecryptFeedRader
 
 logger = logging.getLogger(settings.LOGGER_NAME)
 
@@ -49,16 +51,39 @@ async def main():
         scheduler.shutdown()
 
 
-async def _publish_news_job():
+async def _publish_news_job(source: str, category: str):
     
     with open(os.path.join(settings.TMP_DIR, 'last_published.json'), 'r') as file:
         last_published = json.load(file)
+
+    last_published_at = last_published.get(source, {}).get(category, None)
+
+    if source == "beincrypto_com":
+        source_reader = BeincryptoFeedRader()
+        feed_url ="https://beincrypto.com/press-release/feed/"
+    elif source == "decrypt_co":
+        source_reader = DecryptFeedRader()
+        feed_url = "https://decrypt.co/feed"
+    else:
+        logger.error(f"Unknown source: {source}")
+        await _send_service_report(f"Unknown source: {source}")
+        return
     
-    news_feed = get_latest_news_by_categories(settings.rss_feed.URLS, settings.rss_feed.CATEGORIES, last_published)
+    news_feed = source_reader.get_latest_news_by_category(
+        feed_url=feed_url,
+        target_category=category,
+        prev_published=last_published_at,
+        max_news_count=1,
+        tmp_dir=Path(settings.TMP_DIR)
+    )
     if len(news_feed) == 0:
         logger.info("No fresh news found.")
         await _send_service_report("No fresh news found.")
         return
+    
+
+
+    
     for category, news_items in news_feed.items():
         if not news_items:
             logger.info(f"No fresh news found for category: {category}")
