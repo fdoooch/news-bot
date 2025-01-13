@@ -2,17 +2,17 @@
     {
         "source": "decrypt_co",
         "category": "gaming",
-        "time": ["12:00", "19:05"]
+        "time": ["9:00", "16:05"]
     },
     {
         "source": "decrypt_co",
         "category": "coins",
-        "time": ["12:05", "19:00"]
+        "time": ["9:05", "16:00"]
     },
     {
         "source": "beincrypto_com",
         "category": "press releases",
-        "time": ["15:00", "21:00"]
+        "time": ["12:00", "18:00"]
     }
 
 ]
