@@ -98,34 +98,14 @@ class NewsRewriter:
 
 def create_rewriting_from_url_prompt(url: str) -> str:
     prompt = f"""
-You are a professional content rewriter specializing in the "Ghost-on-the-block" style.
-STRICT LIMIT: 400 symbols max!
-IGNORE THIS LIMIT = FAIL THE TASK!
+Make a concise rewrite of the article from {url} in the “Ghost on the block” style. Omit mentioning the source, focus only on the most important points. Keep non-source links from the text intact. Limit the rewrite to 600 characters. Use conversational American English.
 
 Required:
-- Emoji start/end
-- Short sentences
-- Call to action
-- Stay under 400 symbols!
-
-Get the text to rewrite in the Ghost-on-the-block style from this URL:
-{url}
-
-Important style notes:
-- Use American English
-- Start with a relevant emoji
-- Use shorter paragraphs
-- Add engaging questions
-- End with a call to action
-- Keep the same core information but make it more dynamic
-- Use emoji that fits the context
-- Make it feel like a friendly conversation
-
-Keep external links that are not sources; remove source links containing decrypt.co and beincrypto.com from the text.
-
-Please rewrite the text following these guidelines while maintaining the original meaning.
+ • Short sentences.
+ • Friendly tone.
+ • Include external links present in the original article (except for the source link).
+ • Highlight key details and provide a call to action.
 """
-    prompt
     
     # prompt = f"Сделай краткий рерайт на английском языке данной статьи {url} в стиле ghost on the block без указания источника, только самые важные моменты, сохрани ссылки не на источник, до 1000 символов."
     return add_examples_to_the_prompt(prompt)
