@@ -1,0 +1,18 @@
+[
+    {
+        "source": "decrypt_co",
+        "category": "gaming",
+        "time": ["12:00", "19:05"]
+    },
+    {
+        "source": "decrypt_co",
+        "category": "coins",
+        "time": ["12:05", "19:00"]
+    },
+    {
+        "source": "beincrypto_com",
+        "category": "press releases",
+        "time": ["17:24", "15:00", "21:00"]
+    }
+
+]

@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 import logging
 from dotenv import load_dotenv, find_dotenv
+import json
 
 # Base directory setup
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -22,25 +23,8 @@ def load_env_file() -> bool:
 # Load environment variables
 load_env_file()
 
-
-publishing_schedule = [
-    {
-        "source": "decrypt_co",
-        "category": "gaming",
-        "time": ["12:00", "19:05"]
-    },
-    {
-        "source": "decrypt_co",
-        "category": "coins",
-        "time": ["12:05", "19:00"]
-    },
-    {
-        "source": "beincrypto_com",
-        "category": "press releases",
-        "time": ["15:00", "21:00"]
-    },
-
-]
+with open(f"{APP_DIR}/publishing_schedule.json", "r") as f:
+    publishing_schedule = json.load(f)
 
 
 class TgBotSettings(BaseModel):
