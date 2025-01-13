@@ -121,8 +121,11 @@ Important style notes:
 - Use emoji that fits the context
 - Make it feel like a friendly conversation
 
+Keep external links that are not sources; remove source links containing decrypt.co and beincrypto.com from the text.
+
 Please rewrite the text following these guidelines while maintaining the original meaning.
 """
+    prompt
     
     # prompt = f"Сделай краткий рерайт на английском языке данной статьи {url} в стиле ghost on the block без указания источника, только самые важные моменты, сохрани ссылки не на источник, до 1000 символов."
     return add_examples_to_the_prompt(prompt)
