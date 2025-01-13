@@ -23,26 +23,24 @@ def load_env_file() -> bool:
 load_env_file()
 
 
-schedule = [
+publishing_schedule = [
     {
         "source": "decrypt_co",
         "category": "gaming",
-        "time": ["12:00", "19:00"]
+        "time": ["12:00", "19:05"]
     },
     {
         "source": "decrypt_co",
         "category": "coins",
-        "time": ["12:00", "19:00"]
+        "time": ["12:05", "19:00"]
     },
     {
         "source": "beincrypto_com",
         "category": "press releases",
-        "time": ["9:00", "15:00", "21:00"]
+        "time": ["15:00", "21:00"]
     },
 
 ]
-
-
 
 
 class TgBotSettings(BaseModel):
@@ -160,13 +158,10 @@ class Settings(BaseSettings):
     APP_DIR: Path = Field(default_factory=lambda: APP_DIR)
     TMP_DIR: Path = Field(default_factory=lambda: APP_DIR / "tmp")
     LOGS_DIR: Path = Field(default_factory=lambda: BASE_DIR / "logs")
-    PUBLISHING_SCHEDULE: str = Field(
-        default="17:25",
-        description="Schedule for publishing news in HH:MM format (24-hour)"
-    )
+    PUBLISHING_SCHEDULE: list[dict] = publishing_schedule
     NEWS_TEXT_MAX_LENGTH: int = os.getenv("NEWS_TEXT_MAX_LENGTH", 1000)
     MAX_REWRITING_TRIES: int = os.getenv("MAX_REWRITING_TRIES", 3)
-    SCHEDULE: list[dict] = schedule
+    SCHEDULE: list[dict] = publishing_schedule
     
     model_config = SettingsConfigDict(case_sensitive=True)
 

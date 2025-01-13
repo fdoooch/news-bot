@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from contextlib import contextmanager, asynccontextmanager
 import shutil
+import urllib
 
 @asynccontextmanager
 async def temp_download_async(url: str, prefix: str = "download_"):
@@ -20,12 +21,19 @@ async def temp_download_async(url: str, prefix: str = "download_"):
     temp_dir = tempfile.mkdtemp(prefix=prefix)
     temp_path = None
     
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': urllib.parse.urljoin(url, '/'),  # Add referrer from same domain
+    }
+    
     try:
         filename = os.path.basename(url)
         temp_path = Path(temp_dir) / filename
         
         async with httpx.AsyncClient() as client:
-            async with client.stream('GET', url) as response:
+            async with client.stream('GET', url, headers=headers, follow_redirects=True) as response:
                 response.raise_for_status()
                 
                 with open(temp_path, 'wb') as f:
@@ -83,23 +91,3 @@ async def main():
             
     except httpx.RequestError as e:
         print(f"Download failed: {e}")
-
-# Usage example
-# try:
-#     url = "https://example.com/document.pdf"
-    
-#     # Using context manager (automatically cleans up)
-#     with temporary_download(url) as temp_file:
-#         print(f"Downloaded to: {temp_file}")
-#         # Do something with the file
-#         # File and directory will be automatically removed after this block
-        
-#     # Or without context manager
-#     temp_file = download_to_temp_dir(url)
-#     print(f"Downloaded to: {temp_file}")
-#     # Remember to clean up manually
-#     if temp_file.parent.exists():
-#         shutil.rmtree(temp_file.parent)
-        
-# except requests.RequestException as e:
-#     print(f"Download failed: {e}")

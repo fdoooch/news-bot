@@ -77,10 +77,6 @@ class FeedReader:
                 
                 if target_category and target_category not in entry.categories:
                     continue
-
-                # if _is_already_published(entry.pub_date, prev_published, target_category):
-                #         logger.info(f"Skipping already published news item: {entry.link}")
-                #         continue
                 
                 news_item = _create_news_item(entry, target_category)
                 category_news.append(news_item)
@@ -200,7 +196,7 @@ def parse_rss_feed(xml_content: str) -> Optional[Feed]:
         logger.error(f"Unexpected error while parsing feed: {e}")
         return None
     
-def _is_too_old(pub_date: dt, prev_published: dt, timedelta_days: int=1) -> bool:
+def _is_too_old(pub_date: dt.datetime, prev_published: dt.datetime | None, timedelta_days: int=1) -> bool:
     """
     Check if the publication date is older than 1 day.
     Ensures timezone-aware comparison.
@@ -209,21 +205,6 @@ def _is_too_old(pub_date: dt, prev_published: dt, timedelta_days: int=1) -> bool
     if pub_date < threshold:
         return True
     return pub_date <= prev_published if prev_published else False
-
-
-# def _is_already_published(published: dt, prev_published: dict[str, dt.datetime], categories: list[str]) -> bool:
-#     """
-#     Check if the publication date is older than the previously published date.
-#     Ensures timezone-aware comparison.
-#     """
-#     if not prev_published:
-#         return False
-#     for category in categories:
-#         if not prev_published.get(category.lower()):
-#             continue
-#         if prev_published.get(category.lower()) >= published.isoformat():
-#             return True
-#     return False
 
 
 def _create_news_item(item: FeedItem, category: str) -> NewsItem:

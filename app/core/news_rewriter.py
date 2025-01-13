@@ -123,6 +123,8 @@ Important style notes:
 
 Please rewrite the text following these guidelines while maintaining the original meaning.
 """
+    
+    # prompt = f"Сделай краткий рерайт на английском языке данной статьи {url} в стиле ghost on the block без указания источника, только самые важные моменты, сохрани ссылки не на источник, до 1000 символов."
     return add_examples_to_the_prompt(prompt)
 
 
@@ -180,6 +182,7 @@ Required:
 - One short sentence
 - Stay under 77 symbols!
 - Use American English
+- No hashtags
 - Use emoji
 
 write caption for this news:
@@ -193,3 +196,10 @@ def format_news(news_text: str, news_title: str) -> str:
     text = f"<b>{news_title.upper()}</b>\n\n{news_text}\n{bottom_text}"
     return text
 
+
+
+if __name__ == "__main__":
+    news_rewriter = NewsRewriter(settings.openai.API_KEY)
+    url = "https://decrypt.co/300647/azuki-linked-anime-token-ethereum"
+    text = news_rewriter.rewrite_news_from_url(url)
+    print(text)

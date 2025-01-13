@@ -1,4 +1,4 @@
-from aiogram import Bot, Dispatcher, html
+from aiogram import Bot, Dispatcher
 from aiogram.types import FSInputFile
 import asyncio
 import re
