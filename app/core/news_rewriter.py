@@ -1,4 +1,5 @@
 import openai
+import re
 import logging
 
 from app.core.config import settings
@@ -176,13 +177,43 @@ write caption for this news:
 def format_news(news_text: str, news_title: str) -> str:
     bottom_text = """
 #quests_news"""
+    news_text = convert_md_links_to_html(news_text)
     text = f"<b>{news_title.upper()}</b>\n\n{news_text}\n{bottom_text}"
     return text
+
+
+def convert_md_links_to_html(text: str) -> str:
+    """
+    Convert Markdown links to HTML format.
+    
+    Args:
+        text (str): Text containing Markdown-style links
+        
+    Returns:
+        str: Text with links converted to HTML format
+        
+    Example:
+        >>> text = "Check [this link](https://example.com)"
+        >>> convert_md_links_to_html(text)
+        'Check <a href="https://example.com">this link</a>'
+    """
+    
+    # Pattern to match Markdown links: [text](url)
+    pattern = r'\[(.*?)\]\((.*?)\)'
+    
+    # Replace each match with HTML format
+    def replace_link(match):
+        text, url = match.groups()
+        return f'<a href="{url}">{text}</a>'
+    
+    return re.sub(pattern, replace_link, text)
 
 
 
 if __name__ == "__main__":
     news_rewriter = NewsRewriter(settings.openai.API_KEY)
-    url = "https://decrypt.co/300647/azuki-linked-anime-token-ethereum"
-    text = news_rewriter.rewrite_news_from_url(url)
-    print(text)
+    # url = "https://decrypt.co/300647/azuki-linked-anime-token-ethereum"
+    # text = news_rewriter.rewrite_news_from_url(url)
+    # print(text)
+    text = "Bitcoin mining just hit a new record. It's tougher than ever to mine, thanks to a recent difficulty rise. More miners are joining the network, making the competition fierce. This increased difficulty is a result of Bitcoin's halving, which happens every four years. Curious about how this works? [Check out this guide](https://decrypt.co/resources/what-is-bitcoin-halving). Want to dive into mining? Now's the time to learn and explore!"
+    print(convert_md_links_to_html(text))

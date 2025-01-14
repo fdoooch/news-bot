@@ -81,13 +81,13 @@ class ChannelPoster:
 
 async def main():
     # Bot configuration
-    BOT_TOKEN = "your_bot_token_here"
-    CHANNEL_ID = "@your_channel_name"
-    poster = ChannelPoster(BOT_TOKEN, CHANNEL_ID)
+    BOT_TOKEN = settings.tg_bot.TOKEN
+    CHANNELS_IDS = settings.tg_bot.SERVICE_CHANNELS
+    poster = ChannelPoster(BOT_TOKEN, CHANNELS_IDS, CHANNELS_IDS)
     
     try:
         # Send simple text
-        await poster.send_text("Hello, channel!")
+        # await poster.send_text("Hello, channel!")
         
         # Send formatted text
         html_message = """
@@ -96,21 +96,27 @@ async def main():
         This is a <i>formatted</i> message with:
         • <code>Special formatting</code>
         • <a href='https://example.com'>Links</a>
-        • And more!
+        • And more! 
         """
-        await poster.send_text(html_message, parse_mode="HTML")
+        print(poster.service_channels_ids)
+        await poster.send_text(
+            chat_id=f"@{poster.service_channels_ids[0]}", 
+            text=html_message, 
+            parse_mode="HTML"
+        )
         
         # Send photo with caption
         await poster.send_photo(
-            "path/to/your/photo.jpg",
-            caption="Check out this awesome photo!"
+            chat_id=f"@{poster.service_channels_ids[0]}",
+            image_path=f"{settings.TMP_DIR}/photo.jpg",
+            caption=html_message,
         )
         
-        # Send document
-        await poster.send_document(
-            "path/to/your/document.pdf",
-            caption="Important document"
-        )
+        # # Send document
+        # await poster.send_document(
+        #     "path/to/your/document.pdf",
+        #     caption="Important document"
+        # )
         
     finally:
         await poster.close()
